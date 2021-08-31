@@ -208,6 +208,7 @@ server <- function(input, output, session) {
    })
    output$overall_stats <- renderTable({
       check_data()
+     browser()
       p_id_stats <- master %>% 
          distinct(p_id, gender, age, GMS.general, complete) %>% 
          summarise(n_female = sum(gender == "female", na.rm = T), 
@@ -221,7 +222,7 @@ server <- function(input, output, session) {
                    .groups = "drop")
       p_id_stats %>% 
          select(n_unique, n_complete, starts_with("n"), mean_age, mean_GMS, everything()) %>% 
-          set_names("Total N", "Completed", "Females", "Males", "Other", "Rather not say", "Music Students", "Mean Age", "Mean GMS General") 
+          set_names("Total N", "Completed", "Females", "Males", "Other", "Rather not say",  "Mean Age", "Mean GMS General") 
       })
    
    output$raw_data <- renderDataTable({

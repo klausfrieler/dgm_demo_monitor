@@ -84,7 +84,7 @@ read_data <- function(result_dir = "data/from_server"){
   purrr::map_dfr(results, function(x){
     #browser()
     names <- names(x)
-    if(length(intersect(names, c("ART", "RAT", "SRS", "GMS", "DEG"))) < 4){
+    if(length(intersect(names, c("ART", "RAT", "SRS", "GMS", "DEG"))) != 5){
       return(NULL)
     }
 
