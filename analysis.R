@@ -108,10 +108,48 @@ read_data <- function(result_dir = "data/from_server"){
     join_rows() %>% 
     dplyr::arrange(time_started)
 }
+fake_p_id <- function(p_id){
+  map_chr(p_id, function(x){
+    x %>% str_split("") %>% unlist() %>% sample(size = length(.)) %>% paste(collapse = "")
+  })
+}
+fake_data <- function(data, size = 100L){
+  map_dfc(names(data), function(var_name){
+    var_type <- class(data[[var_name]]) 
+    #browser()
+    messagef("Simulating %s with type %s [n = %d]", var_name, var_type[[1]], size)
+    if("numeric" %in% var_type ){
+      if(var_name != "DEG.gender"){
+        m <- mean(data[[var_name]])
+        sd <- sd(data[[var_name]])
+        if(is.na(sd) || sd == 0 ){
+          sd <- runif(1)  
+        }
+        tmp <- rnorm(size, m, sd) 
+      }
+      else{
+        tmp <- sample(1:4, size = size, replace = T, prob = c(.45, .45, .05, .05))
+      }
+    }
+    else{
+      if(var_name == "p_id"){
+        tmp <- fake_p_id(rep(data[[var_name]][1], size))
+      }
+      else{
+        tmp <- sample(data[[var_name]], size, replace = T)
+      }
+    }
+    tibble({{var_name}} := tmp)
+  }) %>% mutate(complete = TRUE, pilot = FALSE)
+  
+}
 
-
-setup_workspace <- function(results = "data/from_server"){
-  master <- read_data(results)
+setup_workspace <- function(results = "data/from_server", fake_data = FALSE){
+  master <- read_data(results) 
+  if(fake_data){
+    fd <- fake_data(master, size = 50)
+    master <- master %>% bind_rows(fd)
+  }
   master <- master %>% mutate(age = round(DEG.age/12), 
                               gender = factor(DEG.gender, 
                                               levels = 1:4, 
@@ -120,7 +158,9 @@ setup_workspace <- function(results = "data/from_server"){
                               -SRS.num_items, 
                               -ART.num_items, 
                               -SRS.num_correct, 
-                              -ART.num_correct)  
+                              -ART.num_correct, 
+                              -ART.num_foils,
+                              -ART.num_writers)
   assign("master", master, globalenv())
 }
 
