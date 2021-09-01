@@ -160,7 +160,9 @@ setup_workspace <- function(results = "data/from_server", fake_data = FALSE){
                               -SRS.num_correct, 
                               -ART.num_correct, 
                               -ART.num_foils,
-                              -ART.num_writers)
+                              -ART.num_writers,
+                              -ART.items,
+                              -ART.num_foils)
   assign("master", master, globalenv())
 }
 

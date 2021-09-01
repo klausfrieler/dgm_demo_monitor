@@ -88,6 +88,8 @@ ui_new <-
                 sidebarLayout(
                     sidebarPanel(
                         impressum(),
+                        downloadButton("download_all_data_csv", "Download data"),
+                        checkboxInput("dec", label = "Use German Format", value = 0),
                         width = 2
                     ),
                     
@@ -229,7 +231,7 @@ server <- function(input, output, session) {
     output$raw_data <- renderDataTable({
       check_data()
       master %>% 
-        select(-p_id, -num_restarts, -pilot,  -DEG.age, -DEG.gender, -ART.items, -GMS.instrument ) %>% 
+        select(-p_id, -num_restarts, -pilot,  -DEG.age, -DEG.gender, -GMS.instrument ) %>% 
         mutate_if(is.numeric, round, 2) %>% 
         select(time_started, time_ended, language, complete, age, gender, everything())
       }, options = list(lengthMenu = list(c(25, 50,  -1), c("25", "50",  "All"))))
@@ -307,6 +309,14 @@ server <- function(input, output, session) {
     lm_tab <- get_model(master, predictors = input$pc_variable, output_format = "sj")
     shiny::div(shiny::h4("Causal Network Model Regression"), shiny::HTML(lm_tab$knitr))
    })
+  output$download_all_data_csv <- downloadHandler(
+    filename = "dgm_demo_data.csv",
+    content = function(file) {
+      dec <- ifelse(input$dec, ",", ".") 
+      write.table(master, file, row.names = FALSE, dec = dec, sep = ";", quote = T)
+    }
+  )
+  
 }
 
 # Run the application 
